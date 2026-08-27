@@ -1,0 +1,28 @@
+# Only ship the compiled dist + the public docs to npm. Source,
+# tests, lockfile, and dev tooling stay in the repo.
+
+# Sources + tests
+src/
+tools/
+docs/
+
+# Test / build configs
+vitest.config.ts
+tsconfig.json
+tsconfig.tsbuildinfo
+
+# Dev artifacts
+node_modules/
+coverage/
+.turbo/
+
+# Workflow / repo metadata not needed at runtime
+.github/
+.gitignore
+package-lock.json
+pnpm-lock.yaml
+
+# Internal docs
+CLAUDE.md
+REGISTRY-SUBMISSIONS.md
+postman_collection.json

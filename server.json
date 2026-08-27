@@ -1,0 +1,66 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.48x-ai/marketbasketanalysis-mcp",
+  "description": "Co-purchase intelligence and merchant ops tools for AI shopping, ecommerce, and B2B agents",
+  "version": "0.7.0",
+  "websiteUrl": "https://www.marketbasketanalysis.com/docs/mcp",
+  "repository": {
+    "url": "https://github.com/48x-ai/marketbasketanalysis-mcp",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.marketbasketanalysis.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer <mba_live_ API key>, minted in the merchant admin (API keys page)",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "X-MBA-Base",
+          "description": "Optional backend override; must be an MBA-operated plane (app.marketbasketanalysis.com or bigcommerce.marketbasketanalysis.com)",
+          "isRequired": false
+        },
+        {
+          "name": "X-MBA-Platform",
+          "description": "Optional platform hint (shopify, bigcommerce, woocommerce, magento, orocommerce)",
+          "isRequired": false
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@marketbasketanalysis/mcp",
+      "version": "0.7.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "MBA_API_KEY",
+          "description": "Per-store MBA API key (mba_live_...), minted in the merchant admin",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "MBA_API_BASE",
+          "description": "Override for self-hosted WooCommerce/Magento backends; defaults to the MBA hosted backend",
+          "isRequired": false
+        },
+        {
+          "name": "MBA_PLATFORM",
+          "description": "Store platform (shopify, bigcommerce, woocommerce, magento, orocommerce); drives per-platform path mapping and tool gating",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

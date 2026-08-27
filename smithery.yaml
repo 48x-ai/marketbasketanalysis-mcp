@@ -1,0 +1,148 @@
+# Smithery MCP registry metadata.
+# Picked up automatically when the repo is added through the
+# Smithery dashboard. See REGISTRY-SUBMISSIONS.md for the full flow.
+
+name: marketbasketanalysis
+displayName: MarketBasketAnalysis
+description: >-
+  Real co-purchase intelligence + merchant ops tools for AI shopping
+  agents. 19 tools across discovery (recommendations, substitutes,
+  rationale), bundle (cart completion, subscription kits), insight
+  (cross-sell scoring, basket cohesion, return risk), replenishment
+  (B2B reorder prediction, Holt-Winters forecasting), merchant ops
+  (weekly plan, opportunity triage, opportunity + drift explanations,
+  drift + forecast alerts), and advanced mining (high-utility itemset
+  mining). Works for Shopify, BigCommerce, WooCommerce, Magento, and
+  OroCommerce merchants.
+
+icon: https://www.marketbasketanalysis.com/icon.png
+website: https://www.marketbasketanalysis.com
+github: https://github.com/48x-ai/marketbasketanalysis
+license: Proprietary
+
+categories:
+  - ecommerce
+  - agentic-commerce
+  - merchant-tools
+  - analytics
+  - b2b
+
+# How users install + run this server through Smithery.
+startCommand:
+  type: stdio
+  command: npx
+  args:
+    - "-y"
+    - "@marketbasketanalysis/mcp"
+  configSchema:
+    type: object
+    required:
+      - mbaApiKey
+    properties:
+      mbaApiKey:
+        type: string
+        title: MBA API Key
+        description: >-
+          Mint a key in the MarketBasketAnalysis admin (Shopify app
+          drawer or Magento/WooCommerce/BigCommerce admin). The key
+          starts with mba_live_.
+      mbaApiBase:
+        type: string
+        title: API base URL
+        description: Override for self-hosted or staging environments.
+        default: https://app.marketbasketanalysis.com
+  envMapping:
+    MBA_API_KEY: mbaApiKey
+    MBA_API_BASE: mbaApiBase
+
+# Categorization for Smithery's directory.
+tags:
+  - ecommerce
+  - shopify
+  - magento
+  - woocommerce
+  - bigcommerce
+  - recommendations
+  - substitutes
+  - bundles
+  - cross-sell
+  - rationale
+  - weekly-plan
+  - opportunities
+  - drift-detection
+  - forecast
+  - holt-winters
+  - hui-mining
+  - agent-tools
+  - agentic-commerce
+  - b2b
+  - reorder-prediction
+
+# Surfaced in Smithery's tool-list preview.
+tools:
+  - name: get_recommendations
+    description: Complementary products for a single product.
+  - name: find_substitutes
+    description: Replacement options when a product is unavailable.
+  - name: get_rationale
+    description: One-sentence "why" for a recommendation pair.
+  - name: get_bundle_for_cart
+    description: Missing kit components for a multi-item cart.
+  - name: propose_subscription_bundle
+    description: Recurring subscription kit proposal.
+  - name: score_cross_sell
+    description: Strength of a (product_a, product_b) pair.
+  - name: score_return_risk
+    description: Return-risk score for a proposed bundle.
+  - name: analyze_basket
+    description: Cohesion score for a proposed bundle.
+  - name: predict_reorder
+    description: B2B reorder cadence prediction.
+  - name: forecast_bundle
+    description: Weekly forecast + buy quantity for a bundle.
+  - name: get_weekly_plan
+    description: Ranked weekly action plan for the merchant.
+  - name: execute_weekly_plan_action
+    description: Dispatch a specific action from the weekly plan.
+  - name: get_opportunities
+    description: Ranked bundle / cross-sell opportunities.
+  - name: explain_opportunity
+    description: Stats plus a templated "why" for one opportunity.
+  - name: triage_opportunity
+    description: Pause, activate, or archive an opportunity.
+  - name: get_drift_alerts
+    description: Rules whose confidence has materially drifted.
+  - name: explain_drift
+    description: Stats plus a templated "why" for one drift alert.
+  - name: get_forecast_alerts
+    description: Bundles flagged for stockout or demand drop.
+  - name: mine_hui_itemsets
+    description: Run high-utility itemset mining on a payload.
+
+# Example prompts that exercise representative tools. Smithery surfaces
+# these in the listing as "try it" suggestions.
+examples:
+  - prompt: What goes with the gym backpack (product 8472918765)?
+    tool: get_recommendations
+  - prompt: I have a camera body, 32GB SD card, and tripod in my cart. What is missing?
+    tool: get_bundle_for_cart
+  - prompt: Why are the gym backpack and water bottle commonly bought together?
+    tool: get_rationale
+  - prompt: What is on my weekly plan?
+    tool: get_weekly_plan
+  - prompt: Show me my top proposed opportunities.
+    tool: get_opportunities
+  - prompt: Why is opportunity opp-42 a good cross-sell?
+    tool: explain_opportunity
+  - prompt: Activate opportunity opp-42.
+    tool: triage_opportunity
+  - prompt: Are any of my rules drifting?
+    tool: get_drift_alerts
+  - prompt: Why did the pair in drift alert alert-7 drift?
+    tool: explain_drift
+  - prompt: Which bundles are at risk of stockout?
+    tool: get_forecast_alerts
+  - prompt: Forecast bundle b-camera-kit for the next 12 weeks.
+    tool: forecast_bundle
+  - prompt: What is Acme Corp (customer 7654321) due to reorder this week?
+    tool: predict_reorder

@@ -1,0 +1,631 @@
+{
+  "info": {
+    "name": "MarketBasketAnalysis REST API",
+    "description": "Postman collection for the MarketBasketAnalysis REST API, the same API that the [`@marketbasketanalysis/mcp`](https://www.npmjs.com/package/@marketbasketanalysis/mcp) server wraps. Use this collection to exercise the underlying endpoints without going through MCP.\n\n## Setup\n\n1. Fork or duplicate this collection in your Postman workspace.\n2. Set the collection variable `apiKey` to your `mba_live_...` key (Shopify app -> API keys, or your Magento / WooCommerce admin -> API keys).\n3. Optionally override `baseUrl` if you're pointing at a self-hosted instance.\n4. The `Authorization: Bearer {{apiKey}}` header is set on the collection root; every request inherits it.\n\n## Endpoints covered\n\n- Native API (`/api/v1/*`): recommendations, substitutions, B2B reorder predictions, product feeds (Google Merchant Center, Meta Catalog, TikTok Shop).\n- ACP-shaped wrappers (`/api/acp/v1/*`): the same data plane, shaped to the [Agentic Commerce Protocol](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) spec 2026-04-17.\n- Discovery (`/.well-known/agentic-commerce`): unauthenticated capability document for agent crawlers.\n\nDocs: https://marketbasketanalysis.com/docs\nMCP cookbook: https://github.com/48x-ai/marketbasketanalysis/tree/main/packages/mcp/docs/cookbook",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "mba-rest-collection-v1",
+    "version": "0.3.1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{apiKey}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('apiKey')) {",
+          "  console.warn('apiKey is empty. Set the collection variable apiKey to your mba_live_... key before sending requests.');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://app.marketbasketanalysis.com",
+      "type": "string",
+      "description": "Hosted production API base. Override for self-hosted / staging deployments."
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string",
+      "description": "Your mba_live_... key. Mint one in the merchant admin under API keys."
+    },
+    {
+      "key": "feedToken",
+      "value": "",
+      "type": "string",
+      "description": "Feed-scoped token (gmc_..., meta_..., tiktok_...). Different from apiKey because product feeds are tier-gated and scoped to a single shop. Mint feed tokens separately in the admin."
+    },
+    {
+      "key": "productId",
+      "value": "gid://shopify/Product/8472918765",
+      "type": "string",
+      "description": "Sample Shopify product GID. Numeric storefront ids ('8472918765') are also accepted by the REST API."
+    },
+    {
+      "key": "customerId",
+      "value": "7654321",
+      "type": "string",
+      "description": "Sample Shopify customer id. Numeric storefront id or full GID (gid://shopify/Customer/7654321) both accepted."
+    },
+    {
+      "key": "shopDomain",
+      "value": "your-shop.myshopify.com",
+      "type": "string",
+      "description": "Your Shopify shop domain, used as the ?shop= query param on feed endpoints."
+    }
+  ],
+  "item": [
+    {
+      "name": "Native API (/api/v1)",
+      "description": "The native REST surface. Bearer-token auth using your mba_live_... API key. These are the endpoints the MCP server consumes.",
+      "item": [
+        {
+          "name": "GET /api/v1/recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/recommendations?product_id={{productId}}&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "recommendations"],
+              "query": [
+                {
+                  "key": "product_id",
+                  "value": "{{productId}}",
+                  "description": "Numeric storefront id ('8472918765') or platform-specific GID / SKU. Required."
+                },
+                {
+                  "key": "limit",
+                  "value": "3",
+                  "description": "Max recommendations to return. Default 3, max 6."
+                }
+              ]
+            },
+            "description": "For a single product, returns the top complementary products customers also bought, derived from association rules mined from the merchant's actual order history.\n\nSet `apiKey` before sending. The `Authorization: Bearer {{apiKey}}` header is inherited from the collection root.\n\nCookbook: [`get-recommendations.md`](./docs/cookbook/get-recommendations.md). MCP tool that wraps this: `get_recommendations`."
+          },
+          "response": [
+            {
+              "name": "200 OK (typical)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/recommendations?product_id={{productId}}&limit=3",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "recommendations"],
+                  "query": [
+                    { "key": "product_id", "value": "{{productId}}" },
+                    { "key": "limit", "value": "3" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"recommendations\": [\n    {\n      \"productId\": \"gid://shopify/Product/9182734651\",\n      \"sku\": \"CLN-001\",\n      \"title\": \"Camera Cleaning Kit\",\n      \"vendor\": \"OpticsPro\",\n      \"productType\": \"Accessory\",\n      \"confidence\": 0.64,\n      \"returnRate\": 0.04,\n      \"returnedCount\": 12,\n      \"price\": 24.99,\n      \"currency\": \"USD\"\n    },\n    {\n      \"productId\": \"gid://shopify/Product/9182734652\",\n      \"sku\": \"SD-032\",\n      \"title\": \"32GB SD Card\",\n      \"vendor\": \"StoragePro\",\n      \"productType\": \"Storage\",\n      \"confidence\": 0.51,\n      \"returnRate\": 0.02,\n      \"returnedCount\": 4,\n      \"price\": 19.99,\n      \"currency\": \"USD\"\n    }\n  ],\n  \"model_version\": \"fp-growth-2026-05\",\n  \"shop_id\": \"shop_abc123\"\n}"
+            },
+            {
+              "name": "200 OK (no recommendations)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/recommendations?product_id=8472918999&limit=3",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"recommendations\": [],\n  \"model_version\": \"fp-growth-2026-05\",\n  \"shop_id\": \"shop_abc123\"\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/recommendations?product_id={{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "recommendations"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"error\": \"invalid_token\",\n  \"message\": \"API key missing or revoked.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/substitutions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/substitutions?product_id={{productId}}&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "substitutions"],
+              "query": [
+                {
+                  "key": "product_id",
+                  "value": "{{productId}}",
+                  "description": "The product the caller wants to REPLACE. Required."
+                },
+                {
+                  "key": "limit",
+                  "value": "3",
+                  "description": "Max substitutes. Default 3, max 6."
+                }
+              ]
+            },
+            "description": "For a single product, returns ranked replacement options (the inverse of recommendations). Each result carries a `score` (0..1) and a `reason` (context_similar, category_match, vendor_match).\n\nSet `apiKey` before sending. Cookbook: [`find-substitutes.md`](./docs/cookbook/find-substitutes.md). MCP tool: `find_substitutes`."
+          },
+          "response": [
+            {
+              "name": "200 OK (typical)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/substitutions?product_id={{productId}}&limit=3",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "substitutions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"substitutions\": [\n    {\n      \"productId\": \"gid://shopify/Product/9182734851\",\n      \"sku\": \"BAG-225\",\n      \"title\": \"Hiking Daypack 25L\",\n      \"vendor\": \"PackCo\",\n      \"productType\": \"Backpack\",\n      \"score\": 0.78,\n      \"reason\": \"context_similar\",\n      \"signals\": {\n        \"contextOverlap\": 0.78,\n        \"coOccurrence\": 0.42,\n        \"sameProductType\": true,\n        \"sameVendor\": false\n      }\n    },\n    {\n      \"productId\": \"gid://shopify/Product/9182734852\",\n      \"sku\": \"BAG-430\",\n      \"title\": \"Travel Backpack 30L\",\n      \"vendor\": \"PackCo\",\n      \"productType\": \"Backpack\",\n      \"score\": 0.64,\n      \"reason\": \"category_match\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "200 OK (no substitutes)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/substitutions?product_id=8472919900",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "substitutions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"substitutions\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/accounts/:customerId/reorder-predictions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{customerId}}/reorder-predictions?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "accounts", "{{customerId}}", "reorder-predictions"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Max predictions to return. Optional."
+                },
+                {
+                  "key": "product_id",
+                  "value": "",
+                  "description": "Optional: filter to a single product id.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "B2B reorder predictions for a single customer. Returns one prediction per SKU the customer has ordered >= 2 times, bucketed into `overdue`, `due_soon`, `on_track`, `not_predictable`.\n\n**Shopify only in v0.3.** Magento and WooCommerce ports are roadmap.\n\nSet `apiKey` before sending. Set `customerId` to a real customer's storefront id. Cookbook: [`predict-reorder.md`](./docs/cookbook/predict-reorder.md). MCP tool: `predict_reorder`."
+          },
+          "response": [
+            {
+              "name": "200 OK (typical)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/accounts/{{customerId}}/reorder-predictions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "accounts", "{{customerId}}", "reorder-predictions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"customerId\": \"7654321\",\n  \"totalOrders\": 41,\n  \"windowOrders\": 38,\n  \"predictions\": [\n    {\n      \"productId\": \"gid://shopify/Product/9182739001\",\n      \"sku\": \"SOLV-1L\",\n      \"title\": \"Cleaning Solvent 1L\",\n      \"totalOrders\": 11,\n      \"lastOrderedAt\": \"2026-05-04T14:22:00Z\",\n      \"meanIntervalDays\": 28,\n      \"stdevDays\": 4.2,\n      \"predictedNextAt\": \"2026-05-28T14:22:00Z\",\n      \"daysUntilPredicted\": -4,\n      \"confidence\": 0.82,\n      \"status\": \"overdue\"\n    },\n    {\n      \"productId\": \"gid://shopify/Product/9182739010\",\n      \"sku\": \"WIPES-100\",\n      \"title\": \"Lens Wipes Box\",\n      \"totalOrders\": 14,\n      \"lastOrderedAt\": \"2026-05-21T09:11:00Z\",\n      \"meanIntervalDays\": 21,\n      \"stdevDays\": 2.6,\n      \"predictedNextAt\": \"2026-06-11T09:11:00Z\",\n      \"daysUntilPredicted\": 3,\n      \"confidence\": 0.88,\n      \"status\": \"due_soon\"\n    }\n  ]\n}"
+            },
+            {
+              "name": "200 OK (insufficient history)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/accounts/9999999/reorder-predictions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "accounts", "9999999", "reorder-predictions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"customerId\": \"9999999\",\n  \"totalOrders\": 1,\n  \"windowOrders\": 1,\n  \"predictions\": []\n}"
+            },
+            {
+              "name": "404 Not Found (non-Shopify platform)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/accounts/{{customerId}}/reorder-predictions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "accounts", "{{customerId}}", "reorder-predictions"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"error\": \"not_implemented\",\n  \"message\": \"Reorder predictions are Shopify-only in v0.3.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/feeds/google-merchant-center.xml",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{feedToken}}",
+                "description": "Override the collection-root auth: feeds use a feed-scoped token (gmc_...), not your mba_live_... key. Mint it in the admin's Feeds tab."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feeds/google-merchant-center.xml?shop={{shopDomain}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "feeds", "google-merchant-center.xml"],
+              "query": [
+                {
+                  "key": "shop",
+                  "value": "{{shopDomain}}",
+                  "description": "Your shop domain. Optional, the token is scoped to a shop already."
+                },
+                {
+                  "key": "api_key",
+                  "value": "{{feedToken}}",
+                  "description": "Fallback for Google Merchant Center's scheduled fetcher (no custom headers supported). Prefer Authorization: Bearer.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Public Google-Merchant-Center-compatible product feed. RSS 2.0 with `g:` namespace, plus our mined `substitutes` and `compatible_accessories` as structured product detail blocks for Google AI Mode + ChatGPT Shopping.\n\n**Auth scheme:** feed token (`gmc_...`), NOT your `mba_live_...` API key. Set `feedToken` before sending. Either pass it as `Authorization: Bearer` (preferred) or as `?api_key=` (acceptable, required for GMC's scheduled fetcher which doesn't support custom headers).\n\n**Tier:** Pro plan only. Starter shops get a 402.\n\nCookbook: see the Shopify feeds docs at https://marketbasketanalysis.com/docs."
+          },
+          "response": [
+            {
+              "name": "200 OK (sample feed)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{feedToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/feeds/google-merchant-center.xml?shop={{shopDomain}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "feeds", "google-merchant-center.xml"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "xml",
+              "header": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }],
+              "cookie": [],
+              "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:g=\"http://base.google.com/ns/1.0\">\n  <channel>\n    <title>your-shop.myshopify.com - MarketBasketAnalysis product feed</title>\n    <link>https://your-shop.myshopify.com</link>\n    <description>MBA-enriched product feed for Google Merchant Center.</description>\n    <item>\n      <g:id>SKU-001</g:id>\n      <g:title>Camera Cleaning Kit</g:title>\n      <g:price>24.99 USD</g:price>\n      <g:availability>in stock</g:availability>\n      <g:product_detail>\n        <g:section_name>Compatible Accessories</g:section_name>\n        <g:attribute_name>frequently bought with</g:attribute_name>\n        <g:attribute_value>Lens Filter Kit, Camera Strap</g:attribute_value>\n      </g:product_detail>\n    </item>\n  </channel>\n</rss>"
+            },
+            {
+              "name": "401 Unauthorized (bad token)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer gmc_invalid" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/feeds/google-merchant-center.xml",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "feeds", "google-merchant-center.xml"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "text",
+              "header": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }],
+              "cookie": [],
+              "body": "Invalid or revoked feed token"
+            },
+            {
+              "name": "402 Payment Required (Starter tier)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{feedToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/feeds/google-merchant-center.xml",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "feeds", "google-merchant-center.xml"]
+                }
+              },
+              "status": "Payment Required",
+              "code": 402,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"error\": \"tier_required\",\n  \"required_tier\": \"pro\",\n  \"upgrade_url\": \"https://marketbasketanalysis.com/pricing\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/feeds/meta-catalog.csv",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{feedToken}}",
+                "description": "Feed-scoped token (meta_...), not your mba_live_... key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feeds/meta-catalog.csv?shop={{shopDomain}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "feeds", "meta-catalog.csv"],
+              "query": [
+                { "key": "shop", "value": "{{shopDomain}}" },
+                {
+                  "key": "api_key",
+                  "value": "{{feedToken}}",
+                  "description": "Fallback for catalog fetchers that don't support custom headers.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Meta Catalog CSV feed for Facebook + Instagram Shops + Advantage+ Shopping. Standard catalog columns plus MBA-mined `complementary_products` and `substitutes`.\n\nSet `feedToken` (`meta_...`) before sending. Pro tier only.\n\nDocs: https://marketbasketanalysis.com/docs."
+          },
+          "response": [
+            {
+              "name": "200 OK (sample feed)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{feedToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/feeds/meta-catalog.csv?shop={{shopDomain}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "feeds", "meta-catalog.csv"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [{ "key": "Content-Type", "value": "text/csv; charset=utf-8" }],
+              "cookie": [],
+              "body": "id,title,description,availability,condition,price,link,image_link,brand,complementary_products,substitutes\nSKU-001,Camera Cleaning Kit,Microfiber + air bulb + solvent.,in stock,new,24.99 USD,https://your-shop.myshopify.com/products/cleaning-kit,https://cdn.shopify.com/...,OpticsPro,\"SKU-006,SKU-007\",\"SKU-002,SKU-003\"\nSKU-002,32GB SD Card,UHS-I Class 10.,in stock,new,19.99 USD,https://your-shop.myshopify.com/products/sd-32,https://cdn.shopify.com/...,StoragePro,\"SKU-008\",\"SKU-004\""
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/feeds/tiktok-shop.csv",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{feedToken}}",
+                "description": "Feed-scoped token (tiktok_...), not your mba_live_... key."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/feeds/tiktok-shop.csv?shop={{shopDomain}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "feeds", "tiktok-shop.csv"],
+              "query": [
+                { "key": "shop", "value": "{{shopDomain}}" },
+                {
+                  "key": "api_key",
+                  "value": "{{feedToken}}",
+                  "description": "Query-param fallback for fetchers without custom headers.",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "TikTok Shop catalog CSV feed. Same enrichment as the Meta Catalog feed (`complementary_products`, `substitutes`) but TikTok-shaped columns.\n\nSet `feedToken` (`tiktok_...`) before sending. Pro tier only."
+          },
+          "response": [
+            {
+              "name": "200 OK (sample feed)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{feedToken}}" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/feeds/tiktok-shop.csv?shop={{shopDomain}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "feeds", "tiktok-shop.csv"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [{ "key": "Content-Type", "value": "text/csv; charset=utf-8" }],
+              "cookie": [],
+              "body": "sku_id,title,description,price,currency,quantity,brand,image_url,product_url,complementary_skus,substitute_skus\nSKU-001,Camera Cleaning Kit,Microfiber + air bulb + solvent.,24.99,USD,150,OpticsPro,https://cdn.shopify.com/...,https://your-shop.myshopify.com/products/cleaning-kit,\"SKU-006|SKU-007\",\"SKU-002|SKU-003\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ACP wrappers (/api/acp/v1)",
+      "description": "[Agentic Commerce Protocol](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol) (spec 2026-04-17) shaped wrappers around the native endpoints. Same data, shape conforms to ACP `ProductsResponse`. Use these when integrating with an agent framework that already speaks ACP.",
+      "item": [
+        {
+          "name": "GET /api/acp/v1/recommendations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "API-Version",
+                "value": "2026-04-17",
+                "description": "ACP spec version. Optional but recommended; we echo it back in the response."
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/acp/v1/recommendations?product_id={{productId}}&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "acp", "v1", "recommendations"],
+              "query": [
+                {
+                  "key": "product_id",
+                  "value": "{{productId}}",
+                  "description": "Shopify product GID or numeric id. Required."
+                },
+                {
+                  "key": "limit",
+                  "value": "3",
+                  "description": "Max products. Default 3, max 6."
+                }
+              ]
+            },
+            "description": "ACP-compliant `ProductsResponse` for frequently-bought-together products. Same backing data as `/api/v1/recommendations`, just shaped per ACP spec 2026-04-17.\n\nSet `apiKey` before sending. The response includes our `mba_signals` extension on each product (confidence, return rate, paired_with). Discovery doc: `/.well-known/agentic-commerce`."
+          },
+          "response": [
+            {
+              "name": "200 OK (ACP ProductsResponse)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "API-Version", "value": "2026-04-17" }],
+                "url": {
+                  "raw": "{{baseUrl}}/api/acp/v1/recommendations?product_id={{productId}}&limit=3",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "acp", "v1", "recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" },
+                { "key": "API-Version", "value": "2026-04-17" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"products\": [\n    {\n      \"id\": \"gid://shopify/Product/9182734651\",\n      \"title\": \"Camera Cleaning Kit\",\n      \"variants\": [\n        { \"id\": \"CLN-001\", \"title\": \"Camera Cleaning Kit\" }\n      ],\n      \"mba_signals\": {\n        \"confidence\": 0.64,\n        \"return_rate\": 0.04,\n        \"paired_with\": \"gid://shopify/Product/8472918765\"\n      }\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /api/acp/v1/substitutions",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "API-Version", "value": "2026-04-17", "description": "Optional, echoed back." }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/acp/v1/substitutions?product_id={{productId}}&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "acp", "v1", "substitutions"],
+              "query": [
+                { "key": "product_id", "value": "{{productId}}" },
+                { "key": "limit", "value": "3" }
+              ]
+            },
+            "description": "ACP-shaped substitutions: replacement candidates for an unavailable product, returned as an ACP `ProductsResponse` so an ACP-native agent can drop them straight into a swap UI."
+          },
+          "response": [
+            {
+              "name": "200 OK (ACP ProductsResponse)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/acp/v1/substitutions?product_id={{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "acp", "v1", "substitutions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"products\": [\n    {\n      \"id\": \"gid://shopify/Product/9182734851\",\n      \"title\": \"Hiking Daypack 25L\",\n      \"variants\": [\n        { \"id\": \"BAG-225\", \"title\": \"Hiking Daypack 25L\" }\n      ],\n      \"mba_signals\": {\n        \"score\": 0.78,\n        \"reason\": \"context_similar\",\n        \"substitute_for\": \"gid://shopify/Product/8472918765\"\n      }\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Discovery",
+      "description": "Unauthenticated capability documents for agent crawlers + tool registries.",
+      "item": [
+        {
+          "name": "GET /.well-known/agentic-commerce",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/.well-known/agentic-commerce",
+              "host": ["{{baseUrl}}"],
+              "path": [".well-known", "agentic-commerce"]
+            },
+            "auth": { "type": "noauth" },
+            "description": "ACP capability discovery document. No auth required, agents read this to learn which ACP endpoints we implement, which we don't, and how to provision an API key.\n\nThe doc declares the protocol version, capability list, auth scheme, and the URL where merchants mint a key. Mirror this pattern on your own ACP-shaped service so agent crawlers can find your endpoints automatically."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/.well-known/agentic-commerce",
+                  "host": ["{{baseUrl}}"],
+                  "path": [".well-known", "agentic-commerce"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "cookie": [],
+              "body": "{\n  \"protocol\": \"agentic-commerce\",\n  \"spec_version\": \"2026-04-17\",\n  \"spec_url\": \"https://github.com/agentic-commerce-protocol/agentic-commerce-protocol\",\n  \"provider\": {\n    \"name\": \"MarketBasketAnalysis (MBA)\",\n    \"description\": \"Co-purchase analytics for Shopify, frequently-bought-together recommendations and substitution candidates derived from order history.\",\n    \"homepage\": \"https://marketbasketanalysis.com\"\n  },\n  \"auth\": {\n    \"type\": \"bearer\",\n    \"scheme\": \"API Key\",\n    \"header\": \"Authorization\",\n    \"example\": \"Authorization: Bearer mba_live_...\",\n    \"provisioning_url\": \"https://app.marketbasketanalysis.com/app/api-keys\"\n  },\n  \"capabilities\": {\n    \"implemented\": [\n      {\n        \"name\": \"recommendations\",\n        \"method\": \"GET\",\n        \"url\": \"https://app.marketbasketanalysis.com/api/acp/v1/recommendations\",\n        \"response_shape\": \"AcpProductsResponse\",\n        \"query_params\": [\"product_id\", \"limit\"],\n        \"description\": \"Frequently-bought-together products for a given product id.\"\n      },\n      {\n        \"name\": \"substitutions\",\n        \"method\": \"GET\",\n        \"url\": \"https://app.marketbasketanalysis.com/api/acp/v1/substitutions\",\n        \"response_shape\": \"AcpProductsResponse\",\n        \"query_params\": [\"product_id\", \"limit\"]\n      }\n    ],\n    \"not_implemented\": [\n      { \"name\": \"checkout_sessions\", \"reason\": \"Out of scope for MBA, we are analytics, not a checkout provider.\" }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+MarketBasketAnalysis MCP Server
+Copyright © 2026 MarketBasketAnalysis
+
+All rights reserved.
+
+This software is the proprietary information of MarketBasketAnalysis.
+Use is subject to a license agreement available from MarketBasketAnalysis.
+
+Without an active license:
+- This software may be downloaded and inspected.
+- It may be run as an MCP client of the MarketBasketAnalysis hosted
+  backend using a valid MarketBasketAnalysis API key.
+- It may NOT be redistributed, sublicensed, or used to build derivative
+  works.
+
+With an active license:
+- See your license agreement for the specific scope (per-shop, agency,
+  hosted, enterprise).
+
+For licensing inquiries: https://www.marketbasketanalysis.com/contact
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
