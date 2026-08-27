@@ -1,0 +1,52 @@
+name: Publish to MCP Registry
+
+# Publishes server.json to registry.modelcontextprotocol.io under the
+# io.github.48x-ai/* namespace.
+#
+# Why a workflow and not `mcp-publisher login github` on a laptop: the
+# interactive GitHub login only ever grants your PERSONAL namespace
+# (io.github.<your-user>/*). An org-owned server (io.github.48x-ai/*) must
+# prove the org owns the repo, which is exactly what GitHub Actions OIDC does:
+# this job's OIDC token carries repository_owner=48x-ai, so the registry grants
+# io.github.48x-ai/*. Runs from THIS repo (48x-ai/marketbasketanalysis-mcp),
+# whose server.json already names io.github.48x-ai/marketbasketanalysis-mcp.
+#
+# To cut a new version later: bump `version` in both server.json and
+# package.json (npm publish is separate), then re-run this workflow.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write # required for mcp-publisher login github-oidc
+
+concurrency:
+  group: publish-registry
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish server.json
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mcp-publisher (v1.8.1)
+        run: |
+          curl -sSL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz" | tar -xz
+          chmod +x mcp-publisher
+          ./mcp-publisher --help >/dev/null && echo "mcp-publisher installed"
+
+      - name: Validate server.json
+        run: ./mcp-publisher validate
+
+      - name: Login (GitHub Actions OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish
+        run: ./mcp-publisher publish
