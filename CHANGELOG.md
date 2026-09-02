@@ -2,6 +2,19 @@
 
 All notable changes to `@marketbasketanalysis/mcp`.
 
+## 0.7.1 (2026-09-02)
+
+Restores the documented cold install one-liner.
+
+- New bin `mcp` -> `dist/index.js`. npm 9+ auto-selects a bin only when
+  its name matches the unscoped package name, so with multiple bins and
+  none named `mcp`, `npx -y @marketbasketanalysis/mcp` failed cold with
+  "could not determine executable to run". Every listing and the README
+  promise exactly that command. Existing bins unchanged.
+- `repository` now points at the public standalone repo
+  (48x-ai/marketbasketanalysis-mcp); 0.7.0's npm page linked the private
+  monorepo, which 404s for visitors.
+
 ## 0.7.0 (2026-08-11)
 
 Hosted streamable-HTTP endpoint.

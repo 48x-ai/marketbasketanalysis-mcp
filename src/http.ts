@@ -52,7 +52,7 @@ import {
 import { initSentry } from "./lib/sentry.js";
 import { dispatch, toolDefinitions } from "./tools/index.js";
 
-export const SERVER_VERSION = "0.7.0";
+export const SERVER_VERSION = "0.7.1";
 
 const PORT = Number(process.env.PORT ?? 8080);
 

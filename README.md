@@ -306,13 +306,13 @@ Per-tool narrative docs live in the [cookbook](./docs/cookbook/README.md).
 ## Development
 
 ```bash
-git clone https://github.com/48x-ai/marketbasketanalysis-mcp
-cd marketbasketanalysis-mcp
-npm install
-npm run typecheck
-npm test
-npm run dev    # tsx-based local run
-npm run build  # emit ./dist
+git clone https://github.com/48x-ai/marketbasketanalysis
+cd marketbasketanalysis
+pnpm install
+pnpm --filter ./packages/mcp typecheck
+pnpm --filter ./packages/mcp test
+pnpm --filter ./packages/mcp dev    # tsx-based local run
+pnpm --filter ./packages/mcp build  # emit ./dist
 ```
 
 ### Adding a new tool
@@ -339,7 +339,9 @@ the Anthropic marketplace submission content. See
 
 ### Publishing
 
-Bump the version in `package.json` (keep `server.json` and `src/index.ts` in
+Tag-based publish via the monorepo-root
+`.github/workflows/publish-mcp.yml` workflow. Bump the version in
+`packages/mcp/package.json` (keep `server.json` and `src/index.ts` in
 sync), merge to main, then tag `mcp-v$VERSION` and push the tag. The
 workflow runs typecheck, test, build, a tag/version match check, then
 `npm publish --access public --provenance` using the `NPM_TOKEN` repo

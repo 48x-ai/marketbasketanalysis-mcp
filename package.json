@@ -1,11 +1,12 @@
 {
   "name": "@marketbasketanalysis/mcp",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "MCP server for MarketBasketAnalysis. 19 tools for AI shopping, merchant ops, B2B agents: recommendations, substitutes, cart bundle completion, rationale, cross-sell scoring, basket cohesion, return risk, reorder prediction, subscription kits, weekly plan, opportunity triage, opportunity + drift explanations, drift + forecast alerts, bundle forecasting, HUI mining. Works with Claude Desktop, Claude Code, Cursor, Windsurf, Cline, the OpenAI Agent SDK, and Smithery.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
   "mcpName": "io.github.48x-ai/marketbasketanalysis-mcp",
   "bin": {
+    "mcp": "dist/index.js",
     "mba-mcp": "dist/index.js",
     "mba-mcp-http": "dist/http.js",
     "marketbasketanalysis-mcp": "dist/index.js"
