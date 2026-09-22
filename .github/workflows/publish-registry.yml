@@ -48,5 +48,22 @@ jobs:
       - name: Login (GitHub Actions OIDC)
         run: ./mcp-publisher login github-oidc
 
+      # A tag push fires this workflow for whatever version server.json
+      # currently names. When that version is already in the registry the
+      # publish returns 400 "cannot publish duplicate version", which is not a
+      # failure: the registry already has exactly what we wanted it to have.
+      # Treat only that one message as success so tagging a release stops
+      # mailing false failure notices. Every other error still fails the job.
       - name: Publish
-        run: ./mcp-publisher publish
+        run: |
+          set +e
+          out="$(./mcp-publisher publish 2>&1)"
+          code=$?
+          printf '%s\n' "$out"
+          if [ "$code" -ne 0 ]; then
+            if printf '%s' "$out" | grep -q 'cannot publish duplicate version'; then
+              echo "::notice::Registry already serves this version; nothing to publish."
+              exit 0
+            fi
+            exit "$code"
+          fi
